@@ -91,7 +91,7 @@ export default function Dashboard() {
       {/* Schedule */}
       <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="bg-[#1a1a2e] border border-purple-800/40 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
               <h2 className="text-2xl font-black flex items-center gap-2">
                 <Calendar className="w-6 h-6 text-purple-400" />
                 2026 Schedule
@@ -104,7 +104,7 @@ export default function Dashboard() {
               </button>
             </div>
             {scheduleOpen && (
-            <div className="grid gap-3">
+            <div className="grid gap-3 mt-4">
               {workouts.map((w) => {
                 const isNext = nextWorkout?.workout.id === w.id;
                 return (
