@@ -231,7 +231,7 @@ export default function Dashboard() {
 
                 {/* Badges row */}
                 {team.badges.length > 0 && (
-                  <div className="flex items-center gap-2 mt-3 flex-wrap pl-0 md:pl-16">
+                  <div className="flex items-center gap-2 mt-3 flex-wrap" style={{ gridColumn: "2 / -1" }}>
                     {team.badges.map((badge, i) => (
                       <span
                         key={i}
