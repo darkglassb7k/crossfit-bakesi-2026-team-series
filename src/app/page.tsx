@@ -183,7 +183,7 @@ export default function Dashboard() {
                 }`}
               >
                 {/* Grid: fixed columns for rank, logo, name (flex), score */}
-                <div className="grid items-center gap-3" style={{ gridTemplateColumns: "3rem 3rem 1fr auto" }}>
+                <div className="grid items-center gap-2 md:gap-3" style={{ gridTemplateColumns: "2.5rem 2.5rem 1fr auto" }}>
                   {/* Rank */}
                   <div
                     className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-black text-lg md:text-xl ${
