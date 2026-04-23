@@ -176,78 +176,67 @@ export default function Dashboard() {
               <button
                 key={team.teamName}
                 onClick={() => setSelectedTeam(team)}
-                className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 hover:scale-[1.01] hover:shadow-lg cursor-pointer group ${
+                className={`w-full text-left p-4 md:p-5 rounded-2xl border transition-all duration-300 hover:scale-[1.01] hover:shadow-lg cursor-pointer group ${
                   isTop3
                     ? `bg-gradient-to-r ${medalColors[rank - 1]} shadow-[0_0_25px_rgba(138,43,226,0.2)]`
                     : "bg-[#1a1a2e] border-gray-800/40 hover:border-purple-700/50"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl ${
-                        rank === 1
-                          ? "bg-yellow-500/30 text-yellow-300"
-                          : rank === 2
-                          ? "bg-gray-400/20 text-gray-300"
-                          : rank === 3
-                          ? "bg-orange-500/20 text-orange-300"
-                          : "bg-gray-800/50 text-gray-500"
-                      }`}
-                    >
-                      {`#${rank}`}
-                    </div>
-
-                    {team.logo ? (
-                      <img
-                        src={team.logo}
-                        alt={`${displayName(team)} logo`}
-                        className="w-12 h-12 rounded-xl object-contain bg-white/10 p-1"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-xl bg-purple-900/30 flex items-center justify-center">
-                        <Users className="w-6 h-6 text-purple-500" />
-                      </div>
-                    )}
-
-                    <div>
-                      <h3 className="text-base md:text-xl font-black group-hover:text-purple-300 transition-colors">
-                        {displayName(team)}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <span className="text-xs text-gray-500">
-                          {team.members.map((m) => m.name).join(" · ")}
-                        </span>
-                      </div>
-                    </div>
+                {/* Grid: fixed columns for rank, logo, name (flex), score */}
+                <div className="grid items-center gap-3" style={{ gridTemplateColumns: "3rem 3rem 1fr auto" }}>
+                  {/* Rank */}
+                  <div
+                    className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-black text-lg md:text-xl ${
+                      rank === 1
+                        ? "bg-yellow-500/30 text-yellow-300"
+                        : rank === 2
+                        ? "bg-gray-400/20 text-gray-300"
+                        : rank === 3
+                        ? "bg-orange-500/20 text-orange-300"
+                        : "bg-gray-800/50 text-gray-500"
+                    }`}
+                  >
+                    {`#${rank}`}
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="hidden md:flex items-center gap-2">
-                      {team.badges.map((badge, i) => (
-                        <span
-                          key={i}
-                          className="flex items-center gap-1 text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded-full"
-                          title={badge.detail}
-                        >
-                          <BadgeIcon icon={badge.icon} className="w-3 h-3" />
-                          {badge.label}
-                        </span>
-                      ))}
+                  {/* Logo */}
+                  {team.logo ? (
+                    <img
+                      src={team.logo}
+                      alt={`${displayName(team)} logo`}
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-xl object-contain bg-white/10 p-1"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-purple-900/30 flex items-center justify-center">
+                      <Users className="w-5 h-5 md:w-6 md:h-6 text-purple-500" />
                     </div>
-                    <div className="text-right">
-                      <p className="text-3xl font-black text-white">{team.totalScore}</p>
-                      <p className="text-xs text-gray-500">pts</p>
-                    </div>
+                  )}
+
+                  {/* Name + Members */}
+                  <div className="min-w-0">
+                    <h3 className="text-sm md:text-xl font-black group-hover:text-purple-300 transition-colors truncate">
+                      {displayName(team)}
+                    </h3>
+                    <p className="text-xs text-gray-500 truncate">
+                      {team.members.map((m) => m.name).join(" · ")}
+                    </p>
+                  </div>
+
+                  {/* Score */}
+                  <div className="text-right">
+                    <p className="text-2xl md:text-3xl font-black text-white">{team.totalScore}</p>
+                    <p className="text-xs text-gray-500">pts</p>
                   </div>
                 </div>
 
+                {/* Badges row */}
                 {team.badges.length > 0 && (
-                  <div className="flex md:hidden items-center gap-2 mt-3 flex-wrap">
+                  <div className="flex items-center gap-2 mt-3 flex-wrap pl-0 md:pl-16">
                     {team.badges.map((badge, i) => (
                       <span
                         key={i}
                         className="flex items-center gap-1 text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded-full"
+                        title={badge.detail}
                       >
                         <BadgeIcon icon={badge.icon} className="w-3 h-3" />
                         {badge.label}
