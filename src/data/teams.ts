@@ -266,12 +266,9 @@ export const quotes: string[] = [
   "Stronger together.",
   "Every rep counts.",
   "Trust the process.",
-  "We don't quit. We finish.",
   "Your only limit is you.",
-  "One team, one dream.",
   "Show up. Work hard. Be kind.",
   "Progress, not perfection.",
   "Embrace the grind.",
-  "Leave it all on the floor.",
   "Effort is a choice.",
 ];
