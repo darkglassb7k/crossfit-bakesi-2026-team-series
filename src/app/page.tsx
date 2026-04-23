@@ -154,11 +154,13 @@ export default function Dashboard() {
 
       {/* Leaderboard */}
       <main className="max-w-6xl mx-auto px-4 py-8">
-        <h2 className="text-3xl font-black mb-6 flex items-center gap-3">
-          <Trophy className="w-8 h-8 text-[#8A2BE2]" />
-          LEADERBOARD
-          <span className="text-sm font-normal text-gray-500 ml-2">(lowest score wins)</span>
-        </h2>
+        <div className="mb-6">
+          <h2 className="text-3xl font-black flex items-center gap-3">
+            <Trophy className="w-8 h-8 text-[#8A2BE2]" />
+            LEADERBOARD
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">(lowest score wins)</p>
+        </div>
 
         <div className="grid gap-4">
           {analyzedTeams.map((team, index) => {
@@ -193,15 +195,7 @@ export default function Dashboard() {
                           : "bg-gray-800/50 text-gray-500"
                       }`}
                     >
-                      {rank === 1 ? (
-                        <Medal className="w-6 h-6 text-yellow-300" />
-                      ) : rank === 2 ? (
-                        <Medal className="w-6 h-6 text-gray-300" />
-                      ) : rank === 3 ? (
-                        <Medal className="w-6 h-6 text-orange-300" />
-                      ) : (
-                        `#${rank}`
-                      )}
+                      {`#${rank}`}
                     </div>
 
                     {team.logo ? (
@@ -217,7 +211,7 @@ export default function Dashboard() {
                     )}
 
                     <div>
-                      <h3 className="text-xl font-black group-hover:text-purple-300 transition-colors">
+                      <h3 className="text-base md:text-xl font-black group-hover:text-purple-300 transition-colors">
                         {displayName(team)}
                       </h3>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
