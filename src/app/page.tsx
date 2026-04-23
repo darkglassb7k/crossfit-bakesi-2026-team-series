@@ -73,7 +73,7 @@ export default function Dashboard() {
               &ldquo;{quote}&rdquo;
             </p>
             {nextWorkout && nextWorkout.days > 0 && (
-              <div className="flex items-center gap-2 mt-2 text-sm text-gray-400">
+              <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-sm text-gray-400">
                 <Zap className="w-4 h-4 text-yellow-400" />
                 <span>
                   Countdown to Next Workout:{" "}
