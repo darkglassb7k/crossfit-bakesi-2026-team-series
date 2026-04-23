@@ -9,6 +9,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   X,
   Zap,
   Users,
@@ -223,9 +224,12 @@ export default function Dashboard() {
                   </div>
 
                   {/* Score */}
-                  <div className="text-right">
-                    <p className="text-2xl md:text-3xl font-black text-white">{team.totalScore}</p>
-                    <p className="text-xs text-gray-500">pts</p>
+                  <div className="flex items-center justify-end gap-1">
+                    <div className="text-right">
+                      <p className="text-2xl md:text-3xl font-black text-white">{team.totalScore}</p>
+                      <p className="text-xs text-gray-500">pts</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-600 md:hidden shrink-0" />
                   </div>
 
                   {/* Badges row — inside grid, starts at logo column */}
