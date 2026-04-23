@@ -7,8 +7,6 @@ import {
   TrendingUp,
   Star,
   Calendar,
-  ChevronDown,
-  ChevronUp,
   X,
   Zap,
   Users,
@@ -37,7 +35,6 @@ function displayName(team: TeamData) {
 export default function Dashboard() {
   const [selectedTeam, setSelectedTeam] = useState<TeamData | null>(null);
   const [quote, setQuote] = useState(quotes[0]);
-  const [showSchedule, setShowSchedule] = useState(true);
 
   const analyzedTeams = useMemo(() => {
     const result = analyzeTeams(rawTeams);
@@ -70,16 +67,6 @@ export default function Dashboard() {
                 2026 TEAM SERIES DASHBOARD
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowSchedule(!showSchedule)}
-                className="flex items-center gap-2 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-700/50 rounded-xl px-5 py-3 transition-all duration-200"
-              >
-                <Calendar className="w-5 h-5 text-purple-400" />
-                <span className="font-semibold">Schedule</span>
-                {showSchedule ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-            </div>
           </div>
           <div className="mt-4 text-center md:text-left">
             <p className="text-purple-400/80 italic text-sm transition-all duration-500">
@@ -101,9 +88,8 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Schedule Panel */}
-      {showSchedule && (
-        <div className="max-w-6xl mx-auto px-4 py-6 animate-fadeIn">
+      {/* Schedule */}
+      <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="bg-[#1a1a2e] border border-purple-800/40 rounded-2xl p-6">
             <h2 className="text-2xl font-black mb-4 flex items-center gap-2">
               <Calendar className="w-6 h-6 text-purple-400" />
@@ -152,7 +138,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      )}
 
       {/* Leaderboard */}
       <main className="max-w-6xl mx-auto px-4 py-8">
