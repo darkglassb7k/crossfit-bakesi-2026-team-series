@@ -137,7 +137,7 @@ export const teams: TeamData[] = [
     badges: [],
   },
   {
-    teamName: "Team Eddie C.",
+    teamName: "Team Eddie C",
     captainName: "Eddie C",
     groupName: "",
     logo: "/logos/image2.png",
