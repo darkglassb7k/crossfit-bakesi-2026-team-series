@@ -7,6 +7,8 @@ import {
   TrendingUp,
   Star,
   Calendar,
+  ChevronDown,
+  ChevronUp,
   X,
   Zap,
   Users,
@@ -35,6 +37,7 @@ function displayName(team: TeamData) {
 export default function Dashboard() {
   const [selectedTeam, setSelectedTeam] = useState<TeamData | null>(null);
   const [quote, setQuote] = useState(quotes[0]);
+  const [scheduleOpen, setScheduleOpen] = useState(true);
 
   const analyzedTeams = useMemo(() => {
     const result = analyzeTeams(rawTeams);
@@ -88,10 +91,19 @@ export default function Dashboard() {
       {/* Schedule */}
       <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="bg-[#1a1a2e] border border-purple-800/40 rounded-2xl p-6">
-            <h2 className="text-2xl font-black mb-4 flex items-center gap-2">
-              <Calendar className="w-6 h-6 text-purple-400" />
-              2026 Schedule
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-black flex items-center gap-2">
+                <Calendar className="w-6 h-6 text-purple-400" />
+                2026 Schedule
+              </h2>
+              <button
+                onClick={() => setScheduleOpen(!scheduleOpen)}
+                className="p-1.5 rounded-lg hover:bg-purple-900/30 text-gray-500 hover:text-purple-300 transition-colors"
+              >
+                {scheduleOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+            </div>
+            {scheduleOpen && (
             <div className="grid gap-3">
               {workouts.map((w) => {
                 const isNext = nextWorkout?.workout.id === w.id;
@@ -136,6 +148,7 @@ export default function Dashboard() {
                 );
               })}
             </div>
+            )}
           </div>
         </div>
 
