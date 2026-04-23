@@ -159,7 +159,7 @@ export default function Dashboard() {
             <Trophy className="w-8 h-8 text-[#8A2BE2]" />
             LEADERBOARD
           </h2>
-          <p className="text-sm text-gray-500 mt-1">(lowest score wins)</p>
+          <p className="text-sm text-gray-500 mt-1 pl-11">(lowest score wins)</p>
         </div>
 
         <div className="grid gap-4">
