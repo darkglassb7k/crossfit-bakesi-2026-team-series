@@ -58,7 +58,7 @@ export default function Dashboard() {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-purple-900/20" />
         <div className="relative max-w-6xl mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
+            <div className="text-center md:text-left">
               <h1 className="text-4xl md:text-5xl font-black tracking-tight">
                 <span className="text-[#8A2BE2]">CROSSFIT</span>{" "}
                 <span className="text-white">BAKESI</span>
@@ -78,9 +78,6 @@ export default function Dashboard() {
                 <span>
                   Countdown to Next Workout:{" "}
                   <span className="font-bold text-[#8A2BE2]">{nextWorkout.days}</span> days
-                  <span className="text-gray-600 ml-1">
-                    ({nextWorkout.workout.name} · {nextWorkout.workout.format})
-                  </span>
                 </span>
               </div>
             )}
@@ -101,7 +98,7 @@ export default function Dashboard() {
                 return (
                 <div
                   key={w.id}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border transition-all ${
+                  className={`p-4 rounded-xl border transition-all ${
                     w.status === "completed"
                       ? "bg-green-900/10 border-green-800/30"
                       : isNext
@@ -111,26 +108,29 @@ export default function Dashboard() {
                 >
                   <div className="flex items-center gap-3">
                     {w.status === "completed" ? (
-                      <CircleCheck className="w-5 h-5 text-green-400" />
+                      <CircleCheck className="w-5 h-5 text-green-400 shrink-0" />
                     ) : isNext ? (
-                      <Zap className="w-5 h-5 text-yellow-400 animate-pulse" />
+                      <Zap className="w-5 h-5 text-yellow-400 animate-pulse shrink-0" />
                     ) : (
-                      <Timer className="w-5 h-5 text-gray-500" />
+                      <Timer className="w-5 h-5 text-gray-500 shrink-0" />
                     )}
-                    <div>
-                      <p className="font-bold text-lg">{w.name}</p>
-                      <p className="text-sm text-gray-400">{w.date} · {w.type}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-1 sm:gap-3">
+                      <div>
+                        <p className="font-bold text-lg">{w.name}</p>
+                        <p className="text-sm text-gray-400">{w.date}</p>
+                        <p className="text-sm text-gray-500">{w.type}</p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 sm:mt-0">
+                        <span className="text-xs bg-purple-900/40 text-purple-300 px-3 py-1 rounded-full font-medium">
+                          {w.format}
+                        </span>
+                        {isNext && nextWorkout && nextWorkout.days > 0 && (
+                          <span className="text-xs bg-yellow-900/40 text-yellow-300 px-3 py-1 rounded-full font-bold animate-pulse flex items-center gap-1">
+                            <Flame className="w-3 h-3" /> {nextWorkout.label}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-2 sm:mt-0 flex items-center gap-3">
-                    <span className="text-xs bg-purple-900/40 text-purple-300 px-3 py-1 rounded-full font-medium">
-                      {w.format}
-                    </span>
-                    {isNext && nextWorkout && nextWorkout.days > 0 && (
-                      <span className="text-xs bg-yellow-900/40 text-yellow-300 px-3 py-1 rounded-full font-bold animate-pulse flex items-center gap-1">
-                        <Flame className="w-3 h-3" /> {nextWorkout.label}
-                      </span>
-                    )}
                   </div>
                 </div>
                 );
