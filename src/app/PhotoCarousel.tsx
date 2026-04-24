@@ -96,7 +96,7 @@ export default function PhotoCarousel() {
 
       {/* Carousel */}
       <div
-        className="relative aspect-video bg-black/50 rounded-xl overflow-hidden group"
+        className="relative aspect-[3/4] md:aspect-video bg-black/50 rounded-xl overflow-hidden group"
         onMouseEnter={() => setIsAutoPlaying(false)}
         onMouseLeave={() => setIsAutoPlaying(true)}
       >
@@ -104,7 +104,7 @@ export default function PhotoCarousel() {
         <img
           src={photos[currentIndex]}
           alt={`${activeAlbum.title} - Photo ${currentIndex + 1}`}
-          className={`w-full h-full object-contain transition-opacity duration-500 ${
+          className={`w-full h-full object-cover transition-opacity duration-500 ${
             imageLoaded ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => setImageLoaded(true)}
