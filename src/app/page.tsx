@@ -164,8 +164,11 @@ export default function Dashboard() {
       </div>
 
       {/* Leaderboard */}
+      <div className="max-w-6xl mx-auto px-4 py-3">
+        <hr className="border-purple-900/40" />
+      </div>
       <main className="max-w-6xl mx-auto px-4 pt-3 pb-8">
-        <div className="mb-6">
+        <div className="sticky top-0 z-40 bg-[#121212]/95 backdrop-blur-sm pb-3 -mx-4 px-4 pt-3">
           <h2 className="text-3xl font-black flex items-center gap-3">
             <Trophy className="w-8 h-8 text-[#8A2BE2]" />
             LEADERBOARD
