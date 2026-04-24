@@ -272,7 +272,6 @@ export const teams: TeamData[] = [
 export const quotes: string[] = [
   "Better than yesterday.",
   "Community first.",
-  "The only bad workout is the one that didn't happen.",
   "Stronger together.",
   "Every rep counts.",
   "Trust the process.",
