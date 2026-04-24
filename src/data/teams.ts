@@ -6,6 +6,11 @@ export interface Member {
   score: number;
 }
 
+export interface WorkoutDetail {
+  label: string;
+  url: string;
+}
+
 export interface Workout {
   id: number;
   name: string;
@@ -13,6 +18,7 @@ export interface Workout {
   type: string;
   format: string;
   status: "completed" | "upcoming";
+  details?: WorkoutDetail[];
 }
 
 export interface TeamData {
@@ -35,7 +41,11 @@ export interface Badge {
 
 // Schedule
 export const workouts: Workout[] = [
-  { id: 1, name: "Workout 1", date: "Feb 28 - Mar 3", type: "In person/Remote", format: "Individual", status: "completed" },
+  { id: 1, name: "Workout 1", date: "Feb 28 - Mar 3", type: "In person/Remote", format: "Individual", status: "completed", details: [
+    { label: "2026 CrossFit Open 26.1", url: "https://games.crossfit.com/workouts/open/2026/1" },
+    { label: "2026 CrossFit Open 26.2", url: "https://games.crossfit.com/workouts/open/2026/2" },
+    { label: "2026 CrossFit Open 26.3", url: "https://games.crossfit.com/workouts/open/2026/3" },
+  ] },
   { id: 2, name: "Workout 2", date: "May 17 - May 30", type: "In person/Remote", format: "MF-MF", status: "upcoming" },
   { id: 3, name: "Workout 3", date: "Aug 16 - Aug 29", type: "In person/Remote", format: "Individual", status: "upcoming" },
   { id: 4, name: "Workout 4", date: "Oct 18 - Oct 31", type: "In person/Remote", format: "Individual", status: "upcoming" },

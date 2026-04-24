@@ -17,8 +17,9 @@ import {
   Award,
   CircleCheck,
   Medal,
+  Camera,
 } from "lucide-react";
-import { teams as rawTeams, workouts, quotes, TeamData, Badge } from "@/data/teams";
+import { teams as rawTeams, workouts, quotes, TeamData, Badge, Workout } from "@/data/teams";
 import { analyzeTeams, getNextWorkout } from "@/lib/analysis";
 import PhotoCarousel from "./PhotoCarousel";
 
@@ -38,6 +39,7 @@ function displayName(team: TeamData) {
 
 export default function Dashboard() {
   const [selectedTeam, setSelectedTeam] = useState<TeamData | null>(null);
+  const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [quote, setQuote] = useState(quotes[0]);
   const [scheduleOpen, setScheduleOpen] = useState(true);
 
@@ -112,12 +114,13 @@ export default function Dashboard() {
                 return (
                 <div
                   key={w.id}
-                  className={`p-4 rounded-xl border transition-all ${
+                  onClick={() => setSelectedWorkout(w)}
+                  className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer hover:scale-[1.01] hover:shadow-lg ${
                     w.status === "completed"
-                      ? "bg-green-900/10 border-green-800/30"
+                      ? "bg-green-900/10 border-green-800/30 hover:border-green-600/50"
                       : isNext
-                      ? "bg-purple-900/20 border-purple-600/50 shadow-[0_0_20px_rgba(138,43,226,0.15)]"
-                      : "bg-[#121212] border-gray-800/40"
+                      ? "bg-purple-900/20 border-purple-600/50 shadow-[0_0_20px_rgba(138,43,226,0.15)] hover:border-purple-500/70"
+                      : "bg-[#121212] border-gray-800/40 hover:border-gray-600/50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -155,7 +158,7 @@ export default function Dashboard() {
         </div>
 
       {/* Photos */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div id="photos-section" className="max-w-6xl mx-auto px-4 py-6">
         <PhotoCarousel />
       </div>
 
@@ -259,6 +262,104 @@ export default function Dashboard() {
           })}
         </div>
       </main>
+
+      {/* Workout Detail Modal */}
+      {selectedWorkout && (() => {
+        const isCompleted = selectedWorkout.status === "completed";
+        const isNext = nextWorkout?.workout.id === selectedWorkout.id;
+        return (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedWorkout(null)}
+        >
+          <div
+            className="bg-[#1a1a2e] border border-purple-800/50 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-[0_0_60px_rgba(138,43,226,0.3)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-purple-900/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                    isCompleted ? "bg-green-900/30" : isNext ? "bg-yellow-900/30" : "bg-gray-800/50"
+                  }`}>
+                    {isCompleted ? (
+                      <CircleCheck className="w-6 h-6 text-green-400" />
+                    ) : isNext ? (
+                      <Zap className="w-6 h-6 text-yellow-400" />
+                    ) : (
+                      <Timer className="w-6 h-6 text-gray-500" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black">{selectedWorkout.name}</h3>
+                    <p className="text-sm text-gray-400 mt-0.5">{selectedWorkout.date} · {selectedWorkout.format}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedWorkout(null)}
+                  className="p-2 hover:bg-purple-900/30 rounded-xl transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {isCompleted && selectedWorkout.details ? (
+                <>
+                  <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">
+                    Workouts
+                  </h4>
+                  <div className="grid gap-2">
+                    {selectedWorkout.details.map((d, i) => (
+                      <a
+                        key={i}
+                        href={d.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-3 rounded-xl bg-[#121212] border border-gray-800/30 hover:border-purple-700/50 transition-all group"
+                      >
+                        <span className="font-bold group-hover:text-purple-300 transition-colors">{d.label}</span>
+                        <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-purple-400" />
+                      </a>
+                    ))}
+                  </div>
+                </>
+              ) : isNext && nextWorkout && nextWorkout.days > 0 ? (
+                <>
+                  <div className="flex flex-col items-center gap-3 py-4">
+                    <div className="text-6xl font-black text-[#8A2BE2]">{nextWorkout.days}</div>
+                    <div className="text-lg font-bold text-purple-300">days to go</div>
+                  </div>
+                  <div className="mt-4 p-4 rounded-xl bg-[#121212] border border-gray-800/30 text-center">
+                    <p className="text-gray-500 italic">To be announced</p>
+                  </div>
+                </>
+              ) : (
+                <div className="p-4 rounded-xl bg-[#121212] border border-gray-800/30 text-center">
+                  <p className="text-gray-500 italic">To be announced</p>
+                </div>
+              )}
+            </div>
+
+            {isCompleted && (
+              <div className="px-6 pb-6">
+                <button
+                  onClick={() => {
+                    setSelectedWorkout(null);
+                    document.getElementById("photos-section")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-purple-900/30 border border-purple-800/40 text-purple-300 font-bold hover:bg-purple-900/50 transition-all"
+                >
+                  <Camera className="w-5 h-5" />
+                  View Photos
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        );
+      })()}
 
       {/* Team Detail Modal */}
       {selectedTeam && (
