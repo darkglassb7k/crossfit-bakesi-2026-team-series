@@ -93,7 +93,7 @@ export default function Dashboard() {
       </header>
 
       {/* Schedule */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 pt-6 pb-3">
           <div className="bg-[#1a1a2e] border border-purple-800/40 rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-black flex items-center gap-2">
@@ -159,12 +159,12 @@ export default function Dashboard() {
         </div>
 
       {/* Photos */}
-      <div id="photos-section" className="max-w-6xl mx-auto px-4 py-6">
+      <div id="photos-section" className="max-w-6xl mx-auto px-4 py-3">
         <PhotoCarousel />
       </div>
 
       {/* Leaderboard */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 pt-3 pb-8">
         <div className="mb-6">
           <h2 className="text-3xl font-black flex items-center gap-3">
             <Trophy className="w-8 h-8 text-[#8A2BE2]" />
@@ -177,10 +177,10 @@ export default function Dashboard() {
           {analyzedTeams.map((team, index) => {
             const rank = index + 1;
             const isTop3 = rank <= 3;
-            const medalColors = [
-              "from-yellow-500/20 to-yellow-900/10 border-yellow-500/50",
-              "from-gray-300/15 to-gray-700/10 border-gray-400/40",
-              "from-orange-600/15 to-orange-900/10 border-orange-500/40",
+            const topStyles = [
+              "bg-purple-900/60 border-purple-500 shadow-[0_0_20px_rgba(138,43,226,0.15)]",
+              "bg-purple-900/45 border-purple-500/60",
+              "bg-purple-900/30 border-purple-500/20",
             ];
 
             return (
@@ -189,7 +189,7 @@ export default function Dashboard() {
                 onClick={() => setSelectedTeam(team)}
                 className={`w-full text-left p-4 md:p-5 rounded-2xl border transition-all duration-300 hover:scale-[1.01] hover:shadow-lg cursor-pointer group ${
                   isTop3
-                    ? `bg-gradient-to-r ${medalColors[rank - 1]} shadow-[0_0_25px_rgba(138,43,226,0.2)]`
+                    ? topStyles[rank - 1]
                     : "bg-[#1a1a2e] border-gray-800/40 hover:border-purple-700/50"
                 }`}
               >
@@ -198,12 +198,8 @@ export default function Dashboard() {
                   {/* Rank */}
                   <div
                     className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-black text-lg md:text-xl ${
-                      rank === 1
-                        ? "bg-yellow-500/30 text-yellow-300"
-                        : rank === 2
-                        ? "bg-gray-400/20 text-gray-300"
-                        : rank === 3
-                        ? "bg-orange-500/20 text-orange-300"
+                      rank <= 3
+                        ? "bg-purple-900/40 text-purple-300"
                         : "bg-gray-800/50 text-gray-500"
                     }`}
                   >
