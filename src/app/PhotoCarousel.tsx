@@ -165,6 +165,7 @@ export default function PhotoCarousel() {
             </div>
         }
       </div>
+      <p className="text-right text-xs text-gray-600 mt-3">Photo credit: Robert Huang</p>
       </>
       )}
     </div>
