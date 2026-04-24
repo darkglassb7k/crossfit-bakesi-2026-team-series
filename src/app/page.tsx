@@ -148,6 +148,7 @@ export default function Dashboard() {
                         )}
                       </div>
                     </div>
+                    <ChevronRight className="w-4 h-4 text-gray-600 shrink-0 md:hidden" />
                   </div>
                 </div>
                 );
