@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { teams as rawTeams, workouts, quotes, TeamData, Badge } from "@/data/teams";
 import { analyzeTeams, getNextWorkout } from "@/lib/analysis";
+import PhotoCarousel from "./PhotoCarousel";
 
 function BadgeIcon({ icon, className }: { icon: Badge["icon"]; className?: string }) {
   const props = { className: className || "w-5 h-5", strokeWidth: 2 };
@@ -95,7 +96,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-black flex items-center gap-2">
                 <Calendar className="w-6 h-6 text-purple-400" />
-                2026 Schedule
+                Schedule
               </h2>
               <button
                 onClick={() => setScheduleOpen(!scheduleOpen)}
@@ -152,6 +153,11 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+      {/* Photos */}
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <PhotoCarousel />
+      </div>
 
       {/* Leaderboard */}
       <main className="max-w-6xl mx-auto px-4 py-8">
