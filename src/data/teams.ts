@@ -8,7 +8,15 @@ export interface Member {
 
 export interface WorkoutDetail {
   label: string;
-  url: string;
+  url?: string;
+}
+
+export interface WorkoutDescription {
+  title: string;
+  level: string;
+  timeScheme: string;
+  movements: string[];
+  notes?: string[];
 }
 
 export interface Workout {
@@ -19,6 +27,9 @@ export interface Workout {
   format: string;
   status: "completed" | "upcoming";
   details?: WorkoutDetail[];
+  description?: WorkoutDescription[];
+  notes?: string[];
+  eventTime?: string;
 }
 
 export interface TeamData {
@@ -46,7 +57,29 @@ export const workouts: Workout[] = [
     { label: "2026 CrossFit Open 26.2", url: "https://games.crossfit.com/workouts/open/2026/2" },
     { label: "2026 CrossFit Open 26.3", url: "https://games.crossfit.com/workouts/open/2026/3" },
   ] },
-  { id: 2, name: "Workout 2", date: "May 17 - May 30", type: "In person/Remote", format: "MF-MF", status: "upcoming" },
+  { id: 2, name: "Workout 2", date: "May 17 - May 30", type: "In person/Remote", format: "MF-MF", status: "upcoming",
+    eventTime: "Saturday May 23, 10:30 AM - 1:00 PM",
+    description: [
+      {
+        title: "",
+        level: "combined",
+        timeScheme: "MF Partner Workout for Accumulated Repetition",
+        movements: [
+          "Pair 1: AMRAP 4",
+          "3-6-9... Synchro DB Hang Clean to Overhead (50/35#)",
+          "20 Total Double Unders after each round",
+          "",
+          "Pair 2: AMRAP 4",
+          "3-6-9... Synchro DB Hang Clean to Overhead (35/20#)",
+          "20 Total Single Unders after each round",
+        ],
+      },
+    ],
+    notes: [
+      "Each team assigns one M/F pair to Pair 1 and the other to Pair 2. It's up to your team to strategize who does which",
+      "If you cannot make it on May 23, find a coach to judge when you and your team members are available",
+    ],
+  },
   { id: 3, name: "Workout 3", date: "Aug 16 - Aug 29", type: "In person/Remote", format: "Individual", status: "upcoming" },
   { id: 4, name: "Workout 4", date: "Oct 18 - Oct 31", type: "In person/Remote", format: "Individual", status: "upcoming" },
   { id: 5, name: "Workout 5 / 6", date: "Nov 29", type: "In person", format: "Team Series", status: "upcoming" },

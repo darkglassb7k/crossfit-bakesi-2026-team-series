@@ -19,7 +19,7 @@ import {
   Medal,
   Camera,
 } from "lucide-react";
-import { teams as rawTeams, workouts, quotes, TeamData, Badge, Workout } from "@/data/teams";
+import { teams as rawTeams, workouts, quotes, TeamData, Badge, Workout, WorkoutDescription } from "@/data/teams";
 import { analyzeTeams, getNextWorkout } from "@/lib/analysis";
 import PhotoCarousel from "./PhotoCarousel";
 
@@ -111,6 +111,7 @@ export default function Dashboard() {
             <div className="grid gap-3 mt-4">
               {workouts.map((w) => {
                 const isNext = nextWorkout?.workout.id === w.id;
+                const isOngoing = isNext && nextWorkout?.ongoing;
                 return (
                 <div
                   key={w.id}
@@ -141,9 +142,13 @@ export default function Dashboard() {
                         <span className="text-xs bg-purple-900/40 text-purple-300 px-3 py-1 rounded-full font-medium">
                           {w.format}
                         </span>
-                        {isNext && nextWorkout && nextWorkout.days > 0 && (
-                          <span className="text-xs bg-yellow-900/40 text-yellow-300 px-3 py-1 rounded-full font-bold animate-pulse flex items-center gap-1">
-                            <Flame className="w-3 h-3" /> {nextWorkout.label}
+                        {isNext && nextWorkout && (
+                          <span className={`text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1 ${
+                            isOngoing
+                              ? "bg-yellow-900/40 text-yellow-300"
+                              : "bg-yellow-900/40 text-yellow-300 animate-pulse"
+                          }`}>
+                            <Flame className="w-3 h-3" /> {isOngoing ? "Ongoing" : nextWorkout.label}
                           </span>
                         )}
                       </div>
@@ -325,14 +330,104 @@ export default function Dashboard() {
                     ))}
                   </div>
                 </>
-              ) : isNext && nextWorkout && nextWorkout.days > 0 ? (
+              ) : isNext && nextWorkout ? (
                 <>
                   <div className="flex flex-col items-center gap-3 py-4">
                     <div className="text-6xl font-black text-[#8A2BE2]">{nextWorkout.days}</div>
-                    <div className="text-lg font-bold text-purple-300">days to go</div>
+                    <div className="text-lg font-bold text-purple-300">
+                      {nextWorkout.ongoing ? "days left" : "days to go"}
+                    </div>
                   </div>
-                  <div className="mt-4 p-4 rounded-xl bg-[#121212] border border-gray-800/30 text-center">
-                    <p className="text-gray-500 italic">To be announced</p>
+                  {selectedWorkout.eventTime && (
+                    <div className="mt-2 mb-4 p-3 rounded-xl bg-yellow-900/20 border border-yellow-800/30 text-center">
+                      <p className="text-yellow-300 font-bold text-sm">{selectedWorkout.eventTime}</p>
+                    </div>
+                  )}
+                  {selectedWorkout.description ? (
+                    <div className="mt-4 space-y-4">
+                      {selectedWorkout.description.map((desc, i) => (
+                        <div key={i} className="p-4 rounded-xl bg-[#121212] border border-gray-800/30">
+                          {desc.timeScheme && (
+                            <p className="text-sm text-purple-300 font-bold mb-3">{desc.timeScheme}</p>
+                          )}
+                          <div className="space-y-1.5">
+                            {desc.movements.map((m, j) => (
+                              m === "" ? (
+                                <div key={j} className="h-3" />
+                              ) : m.startsWith("Pair") ? (
+                                <p key={j} className="text-sm font-bold text-white mt-2">{m}</p>
+                              ) : (
+                                <p key={j} className="text-sm text-gray-200 flex items-start gap-2 pl-2">
+                                  <span className="text-purple-400 mt-0.5">•</span>
+                                  {m}
+                                </p>
+                              )
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      {selectedWorkout.notes && selectedWorkout.notes.length > 0 && (
+                        <div className="p-3 rounded-xl bg-gray-800/20 border border-gray-700/30">
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
+                          <ul className="space-y-1">
+                            {selectedWorkout.notes.map((note, i) => (
+                              <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                                <span className="text-gray-500 mt-0.5">·</span>
+                                {note}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-4 p-4 rounded-xl bg-[#121212] border border-gray-800/30 text-center">
+                      <p className="text-gray-500 italic">To be announced</p>
+                    </div>
+                  )}
+                </>
+              ) : selectedWorkout.description ? (
+                <>
+                  {selectedWorkout.eventTime && (
+                    <div className="mb-4 p-3 rounded-xl bg-yellow-900/20 border border-yellow-800/30 text-center">
+                      <p className="text-yellow-300 font-bold text-sm">{selectedWorkout.eventTime}</p>
+                    </div>
+                  )}
+                  <div className="space-y-4">
+                    {selectedWorkout.description.map((desc, i) => (
+                      <div key={i} className="p-4 rounded-xl bg-[#121212] border border-gray-800/30">
+                        {desc.timeScheme && (
+                          <p className="text-sm text-purple-300 font-bold mb-3">{desc.timeScheme}</p>
+                        )}
+                        <div className="space-y-1.5">
+                          {desc.movements.map((m, j) => (
+                            m === "" ? (
+                              <div key={j} className="h-3" />
+                            ) : m.startsWith("Pair") ? (
+                              <p key={j} className="text-sm font-bold text-white mt-2">{m}</p>
+                            ) : (
+                              <p key={j} className="text-sm text-gray-200 flex items-start gap-2 pl-2">
+                                <span className="text-purple-400 mt-0.5">•</span>
+                                {m}
+                              </p>
+                            )
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    {selectedWorkout.notes && selectedWorkout.notes.length > 0 && (
+                      <div className="p-3 rounded-xl bg-gray-800/20 border border-gray-700/30">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
+                        <ul className="space-y-1">
+                          {selectedWorkout.notes.map((note, i) => (
+                            <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                              <span className="text-gray-500 mt-0.5">·</span>
+                              {note}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
