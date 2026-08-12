@@ -1,21 +1,46 @@
 // Positive-only analysis engine for CrossFit Bakesi Team Series
-import { TeamData, Badge, Workout } from "@/data/teams";
+import { TeamData, Badge, Workout, WorkoutContribution } from "@/data/teams";
+
+/** Sum of a team's Workout 1 individual placement points. */
+export function workout1Total(team: TeamData): number {
+  return team.members.reduce((sum, m) => sum + m.score, 0);
+}
 
 /**
- * Compute positive highlights and badges for each team.
- * Only badge awarded: Team Synergy (close scores among all 4 members).
+ * Standings comparator: lowest cumulative total wins.
+ * Teams that missed a completed workout (incomplete) are always ranked last.
+ */
+export function compareStandings(a: TeamData, b: TeamData): number {
+  if (!!a.incomplete !== !!b.incomplete) return a.incomplete ? 1 : -1;
+  return a.totalScore - b.totalScore;
+}
+
+/**
+ * Compute per-workout contributions, positive highlights and badges for each team.
+ * Only badge awarded: Team Synergy (close scores among all 4 members in Workout 1).
  */
 export function analyzeTeams(teams: TeamData[]): TeamData[] {
   const analyzed = teams.map((t) => ({ ...t, highlights: [] as string[], badges: [] as Badge[] }));
 
   for (const team of analyzed) {
+    // Build per-workout contribution breakdown (W1 individual + any team workouts)
+    const w1 = workout1Total(team);
+    const contributions: WorkoutContribution[] = [
+      { workoutId: 1, label: "W1", format: "Individual" as const, score: w1 },
+      ...team.teamScores.map((ts) => ({
+        workoutId: ts.workoutId,
+        label: `W${ts.workoutId}`,
+        format: "Team" as const,
+        score: ts.score,
+      })),
+    ].sort((a, b) => a.workoutId - b.workoutId);
+    team.contributions = contributions;
+
+    // Team Synergy — based on Workout 1 individual chemistry
     const scores = team.members.map((m) => m.score);
-    const max = Math.max(...scores);
-    const min = Math.min(...scores);
-    const range = max - min;
+    const range = Math.max(...scores) - Math.min(...scores);
     const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
     const cv = range / avg;
-
     if (cv < 0.6) {
       team.badges.push({
         type: "synergy",

@@ -20,7 +20,7 @@ import {
   Camera,
 } from "lucide-react";
 import { teams as rawTeams, workouts, quotes, TeamData, Badge, Workout, WorkoutDescription } from "@/data/teams";
-import { analyzeTeams, getNextWorkout } from "@/lib/analysis";
+import { analyzeTeams, getNextWorkout, compareStandings } from "@/lib/analysis";
 import PhotoCarousel from "./PhotoCarousel";
 
 function BadgeIcon({ icon, className }: { icon: Badge["icon"]; className?: string }) {
@@ -45,7 +45,7 @@ export default function Dashboard() {
 
   const analyzedTeams = useMemo(() => {
     const result = analyzeTeams(rawTeams);
-    return result.sort((a, b) => a.totalScore - b.totalScore);
+    return result.sort(compareStandings);
   }, []);
 
   useEffect(() => {
@@ -57,6 +57,20 @@ export default function Dashboard() {
   }, []);
 
   const nextWorkout = useMemo(() => getNextWorkout(workouts), []);
+
+  // Team-format workout results, keyed by workout id (e.g. Workout 2), ranked lowest-first
+  const teamWorkoutResults = useMemo(() => {
+    const map: Record<number, { team: TeamData; score: number }[]> = {};
+    for (const team of analyzedTeams) {
+      for (const ts of team.teamScores) {
+        (map[ts.workoutId] ??= []).push({ team, score: ts.score });
+      }
+    }
+    for (const id of Object.keys(map)) {
+      map[Number(id)].sort((a, b) => a.score - b.score);
+    }
+    return map;
+  }, [analyzedTeams]);
 
   return (
     <div className="min-h-screen bg-[#121212] text-white">
@@ -235,13 +249,35 @@ export default function Dashboard() {
                     <p className="text-xs text-gray-500 truncate">
                       {team.members.map((m) => m.name).join(" · ")}
                     </p>
+                    {team.contributions && team.contributions.length > 1 && (
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        {team.contributions.map((c) => (
+                          <span
+                            key={c.workoutId}
+                            className="text-[10px] md:text-xs text-gray-400 bg-black/30 border border-gray-700/40 px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                            title={`${c.format === "Team" ? "Team workout" : "Individual workout"}`}
+                          >
+                            {c.label} <span className="font-bold text-gray-300">{c.score}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Score */}
                   <div className="flex items-center justify-end gap-1">
                     <div className="text-right">
-                      <p className="text-2xl md:text-3xl font-black text-white">{team.totalScore}</p>
-                      <p className="text-xs text-gray-500">pts</p>
+                      {team.incomplete ? (
+                        <>
+                          <p className="text-2xl md:text-3xl font-black text-gray-500">N/A</p>
+                          <p className="text-xs text-gray-600">did not compete</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-2xl md:text-3xl font-black text-white">{team.totalScore}</p>
+                          <p className="text-xs text-gray-500">pts</p>
+                        </>
+                      )}
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-600 md:hidden shrink-0" />
                   </div>
@@ -435,6 +471,49 @@ export default function Dashboard() {
                   <p className="text-gray-500 italic">To be announced</p>
                 </div>
               )}
+
+              {/* Team-workout results table (e.g. Workout 2) */}
+              {isCompleted && teamWorkoutResults[selectedWorkout.id]?.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">
+                    Team Results
+                  </h4>
+                  <div className="grid gap-1.5">
+                    {teamWorkoutResults[selectedWorkout.id].map((r, i) => (
+                      <div
+                        key={r.team.teamName}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl border ${
+                          i < 3
+                            ? "bg-purple-900/25 border-purple-700/40"
+                            : "bg-[#121212] border-gray-800/30"
+                        }`}
+                      >
+                        <span className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center text-sm font-black ${
+                          i < 3 ? "bg-purple-900/50 text-purple-200" : "bg-gray-800/50 text-gray-500"
+                        }`}>
+                          {i + 1}
+                        </span>
+                        {r.team.logo ? (
+                          <img
+                            src={r.team.logo}
+                            alt=""
+                            className="w-7 h-7 rounded-lg object-contain bg-white/10 p-0.5 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 rounded-lg bg-purple-900/30 flex items-center justify-center shrink-0">
+                            <Users className="w-4 h-4 text-purple-500" />
+                          </div>
+                        )}
+                        <span className="font-bold text-sm truncate flex-1 min-w-0">
+                          {displayName(r.team)}
+                        </span>
+                        <span className="font-black text-lg shrink-0">{r.score}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 text-center">Lowest score wins</p>
+                </div>
+              )}
             </div>
 
             {isCompleted && (
@@ -483,7 +562,7 @@ export default function Dashboard() {
                   <div>
                     <h3 className="text-2xl font-black">{displayName(selectedTeam)}</h3>
                     <p className="text-purple-400 text-sm mt-1">
-                      Total: <span className="font-bold text-white text-lg">{selectedTeam.totalScore}</span>
+                      Total: <span className="font-bold text-white text-lg">{selectedTeam.incomplete ? "N/A" : selectedTeam.totalScore}</span>
                       <span className="text-gray-500 ml-2">
                         · Rank #{analyzedTeams.findIndex((t) => t.teamName === selectedTeam.teamName) + 1}
                       </span>
@@ -499,10 +578,46 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* Score Breakdown */}
+            <div className="p-6 pb-0">
+              <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">
+                Score Breakdown
+              </h4>
+              <div className="grid gap-2">
+                {selectedTeam.contributions?.map((c) => (
+                  <div
+                    key={c.workoutId}
+                    className="flex items-center justify-between p-3 rounded-xl bg-[#121212] border border-gray-800/30"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">Workout {c.workoutId}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        c.format === "Team"
+                          ? "bg-purple-900/40 text-purple-300"
+                          : "bg-gray-800/60 text-gray-400"
+                      }`}>
+                        {c.format}
+                      </span>
+                    </div>
+                    <span className="font-black text-lg">{c.score}</span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-purple-900/30 border border-purple-700/40">
+                  <span className="font-bold text-purple-200">Total</span>
+                  <span className="font-black text-xl text-white">{selectedTeam.incomplete ? "N/A" : selectedTeam.totalScore}</span>
+                </div>
+                {selectedTeam.incomplete && (
+                  <p className="text-xs text-gray-500 text-center mt-1">
+                    Did not compete in Workout 2 — total shown as N/A
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Members */}
             <div className="p-6">
               <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">
-                Individual Scores
+                Workout 1 · Individual
               </h4>
               <div className="grid gap-2">
                 {[...selectedTeam.members]
