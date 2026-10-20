@@ -96,10 +96,17 @@ export default function Dashboard() {
             {nextWorkout && nextWorkout.days > 0 && (
               <div className="flex items-center justify-center md:justify-start gap-2 mt-2 text-sm text-gray-400">
                 <Zap className="w-4 h-4 text-yellow-400" />
-                <span>
-                  Countdown to Next Workout:{" "}
-                  <span className="font-bold text-[#8A2BE2]">{nextWorkout.days}</span> days
-                </span>
+                {nextWorkout.ongoing ? (
+                  <span>
+                    {nextWorkout.workout.name} is on now:{" "}
+                    <span className="font-bold text-[#8A2BE2]">{nextWorkout.days}</span> days left
+                  </span>
+                ) : (
+                  <span>
+                    {nextWorkout.workout.name} starts in{" "}
+                    <span className="font-bold text-[#8A2BE2]">{nextWorkout.days}</span> days
+                  </span>
+                )}
               </div>
             )}
           </div>

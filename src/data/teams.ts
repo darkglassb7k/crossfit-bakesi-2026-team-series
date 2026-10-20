@@ -113,7 +113,51 @@ export const workouts: Workout[] = [
       "Score = Total Calories ÷ Body Weight",
     ],
   },
-  { id: 4, name: "Workout 4", date: "Oct 18 - Oct 31", type: "In person/Remote", format: "Individual", status: "upcoming" },
+  { id: 4, name: "Workout 4", date: "Oct 20 - Oct 31", type: "In person/Remote", format: "Individual", status: "upcoming",
+    description: [
+      {
+        title: "",
+        level: "individual",
+        timeScheme: "Option 1: For Time",
+        movements: [
+          "50 Shuttle Runs (25 ft x2)",
+          "50 Burpee Box Jump Overs (24/20\")",
+        ],
+      },
+      {
+        title: "",
+        level: "individual",
+        timeScheme: "Option 2: 2 Rounds for Time",
+        movements: [
+          "25 Shuttle Runs (25 ft x2)",
+          "25 Burpee Box Jump Overs (24/20\")",
+        ],
+      },
+      {
+        title: "",
+        level: "individual",
+        timeScheme: "Option 3: For Time",
+        movements: [
+          "25 Shuttle Runs (25 ft x2)",
+          "50 Burpee Box Jump Overs (24/20\")",
+          "25 Shuttle Runs (25 ft x2)",
+        ],
+      },
+      {
+        title: "",
+        level: "individual",
+        timeScheme: "Option 4: 5 Rounds for Time",
+        movements: [
+          "10 Shuttle Runs (25 ft x2)",
+          "10 Burpee Box Jump Overs (24/20\")",
+        ],
+      },
+    ],
+    notes: [
+      "Each teammate completes ONE of the four options",
+      "Step over OK on the Burpee Box Jump Overs",
+    ],
+  },
   { id: 5, name: "Workout 5 / 6", date: "Nov 29", type: "In person", format: "Team Series", status: "upcoming" },
   { id: 6, name: "Workout 7 / 8", date: "Dec 5", type: "In person", format: "Team Series", status: "upcoming" },
 ];
