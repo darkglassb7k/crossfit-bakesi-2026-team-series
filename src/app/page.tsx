@@ -20,7 +20,7 @@ import {
   Camera,
 } from "lucide-react";
 import { teams as rawTeams, workouts, quotes, TeamData, Badge, Workout, WorkoutDescription } from "@/data/teams";
-import { analyzeTeams, getNextWorkout, compareStandings } from "@/lib/analysis";
+import { analyzeTeams, getNextWorkout, compareStandings, tiedRanks } from "@/lib/analysis";
 import PhotoCarousel from "./PhotoCarousel";
 
 function BadgeIcon({ icon, className }: { icon: Badge["icon"]; className?: string }) {
@@ -47,6 +47,8 @@ export default function Dashboard() {
     const result = analyzeTeams(rawTeams);
     return result.sort(compareStandings);
   }, []);
+  // Tied totals share a rank
+  const ranks = useMemo(() => tiedRanks(analyzedTeams, (t) => t.totalScore), [analyzedTeams]);
 
   useEffect(() => {
     setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
@@ -58,16 +60,19 @@ export default function Dashboard() {
 
   const nextWorkout = useMemo(() => getNextWorkout(workouts), []);
 
-  // Team-format workout results, keyed by workout id (e.g. Workout 2), ranked lowest-first
+  // Per-team results for every workout after W1 (team format, or summed individual scores),
+  // keyed by workout id, ranked lowest-first with ties sharing a rank
   const teamWorkoutResults = useMemo(() => {
-    const map: Record<number, { team: TeamData; score: number }[]> = {};
+    const map: Record<number, { team: TeamData; score: number; rank: number }[]> = {};
     for (const team of analyzedTeams) {
-      for (const ts of team.teamScores) {
-        (map[ts.workoutId] ??= []).push({ team, score: ts.score });
+      for (const c of team.contributions ?? []) {
+        if (c.workoutId === 1) continue;
+        (map[c.workoutId] ??= []).push({ team, score: c.score, rank: 0 });
       }
     }
     for (const id of Object.keys(map)) {
-      map[Number(id)].sort((a, b) => a.score - b.score);
+      const results = map[Number(id)].sort((a, b) => a.score - b.score);
+      tiedRanks(results, (r) => r.score).forEach((rank, i) => (results[i].rank = rank));
     }
     return map;
   }, [analyzedTeams]);
@@ -204,7 +209,7 @@ export default function Dashboard() {
 
         <div className="grid gap-4">
           {analyzedTeams.map((team, index) => {
-            const rank = index + 1;
+            const rank = ranks[index];
             const isTop3 = rank <= 3;
             const topStyles = [
               "bg-purple-900/60 border-purple-500 shadow-[0_0_20px_rgba(138,43,226,0.15)]",
@@ -486,19 +491,19 @@ export default function Dashboard() {
                     Team Results
                   </h4>
                   <div className="grid gap-1.5">
-                    {teamWorkoutResults[selectedWorkout.id].map((r, i) => (
+                    {teamWorkoutResults[selectedWorkout.id].map((r) => (
                       <div
                         key={r.team.teamName}
                         className={`flex items-center gap-3 p-2.5 rounded-xl border ${
-                          i < 3
+                          r.rank <= 3
                             ? "bg-purple-900/25 border-purple-700/40"
                             : "bg-[#121212] border-gray-800/30"
                         }`}
                       >
                         <span className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center text-sm font-black ${
-                          i < 3 ? "bg-purple-900/50 text-purple-200" : "bg-gray-800/50 text-gray-500"
+                          r.rank <= 3 ? "bg-purple-900/50 text-purple-200" : "bg-gray-800/50 text-gray-500"
                         }`}>
-                          {i + 1}
+                          {r.rank}
                         </span>
                         {r.team.logo ? (
                           <img
@@ -571,7 +576,7 @@ export default function Dashboard() {
                     <p className="text-purple-400 text-sm mt-1">
                       Total: <span className="font-bold text-white text-lg">{selectedTeam.incomplete ? "N/A" : selectedTeam.totalScore}</span>
                       <span className="text-gray-500 ml-2">
-                        · Rank #{analyzedTeams.findIndex((t) => t.teamName === selectedTeam.teamName) + 1}
+                        · Rank #{ranks[analyzedTeams.findIndex((t) => t.teamName === selectedTeam.teamName)]}
                       </span>
                     </p>
                   </div>
@@ -621,14 +626,21 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Members */}
-            <div className="p-6">
+            {/* Members: one section per individual workout, latest first */}
+            {selectedTeam.contributions
+              ?.filter((c) => c.format === "Individual")
+              .sort((a, b) => b.workoutId - a.workoutId)
+              .map((c) => {
+                const memberScore = (m: TeamData["members"][number]) =>
+                  c.workoutId === 1 ? m.score : m.individualScores?.[c.workoutId] ?? 0;
+                return (
+            <div key={c.workoutId} className="p-6 pb-0 last:pb-6">
               <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">
-                Workout 1 · Individual
+                Workout {c.workoutId} · Individual
               </h4>
               <div className="grid gap-2">
                 {[...selectedTeam.members]
-                  .sort((a, b) => a.score - b.score)
+                  .sort((a, b) => memberScore(a) - memberScore(b))
                   .map((member, i) => {
                     const isTeamBest = i === 0;
                     return (
@@ -643,7 +655,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-3">
                           {isTeamBest && <Star className="w-4 h-4 text-yellow-400" />}
                           <span className={`font-bold ${isTeamBest ? "text-purple-200" : ""}`}>
-                            {member.name}
+                            {member.workoutNames?.[c.workoutId] ?? member.name}
                           </span>
                           {isTeamBest && (
                             <span className="text-xs bg-yellow-900/40 text-yellow-300 px-2 py-0.5 rounded-full">
@@ -651,12 +663,14 @@ export default function Dashboard() {
                             </span>
                           )}
                         </div>
-                        <span className="font-black text-lg">{member.score}</span>
+                        <span className="font-black text-lg">{memberScore(member)}</span>
                       </div>
                     );
                   })}
               </div>
             </div>
+                );
+              })}
 
             {/* Badges */}
             {selectedTeam.badges.length > 0 && (

@@ -6,6 +6,31 @@ export function workout1Total(team: TeamData): number {
   return team.members.reduce((sum, m) => sum + m.score, 0);
 }
 
+/** Sum of a team's individual points for a later individual workout (W3, ...). */
+export function individualWorkoutTotal(team: TeamData, workoutId: number): number {
+  return team.members.reduce((sum, m) => sum + (m.individualScores?.[workoutId] ?? 0), 0);
+}
+
+/** Workout ids (other than W1) that have individual scores recorded for this team. */
+function individualWorkoutIds(team: TeamData): number[] {
+  const ids = new Set<number>();
+  for (const m of team.members) {
+    for (const id of Object.keys(m.individualScores ?? {})) ids.add(Number(id));
+  }
+  return [...ids];
+}
+
+/**
+ * Competition ranking ("1, 2, 2, 4"): tied scores share a rank.
+ * `items` must already be sorted lowest-first.
+ */
+export function tiedRanks<T>(items: T[], score: (item: T) => number): number[] {
+  let rank = 0;
+  return items.map((item, i) =>
+    i === 0 || score(items[i - 1]) !== score(item) ? (rank = i + 1) : rank
+  );
+}
+
 /**
  * Standings comparator: lowest cumulative total wins.
  * Teams that missed a completed workout (incomplete) are always ranked last.
@@ -16,17 +41,23 @@ export function compareStandings(a: TeamData, b: TeamData): number {
 }
 
 /**
- * Compute per-workout contributions, positive highlights and badges for each team.
- * Only badge awarded: Team Synergy (close scores among all 4 members in Workout 1).
+ * Compute per-workout contributions and cumulative totals for each team.
+ * No badges are awarded.
  */
 export function analyzeTeams(teams: TeamData[]): TeamData[] {
   const analyzed = teams.map((t) => ({ ...t, highlights: [] as string[], badges: [] as Badge[] }));
 
   for (const team of analyzed) {
-    // Build per-workout contribution breakdown (W1 individual + any team workouts)
+    // Build per-workout contribution breakdown (W1 individual + later individual + team workouts)
     const w1 = workout1Total(team);
     const contributions: WorkoutContribution[] = [
       { workoutId: 1, label: "W1", format: "Individual" as const, score: w1 },
+      ...individualWorkoutIds(team).map((id) => ({
+        workoutId: id,
+        label: `W${id}`,
+        format: "Individual" as const,
+        score: individualWorkoutTotal(team, id),
+      })),
       ...team.teamScores.map((ts) => ({
         workoutId: ts.workoutId,
         label: `W${ts.workoutId}`,
@@ -35,20 +66,7 @@ export function analyzeTeams(teams: TeamData[]): TeamData[] {
       })),
     ].sort((a, b) => a.workoutId - b.workoutId);
     team.contributions = contributions;
-
-    // Team Synergy — based on Workout 1 individual chemistry
-    const scores = team.members.map((m) => m.score);
-    const range = Math.max(...scores) - Math.min(...scores);
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    const cv = range / avg;
-    if (cv < 0.6) {
-      team.badges.push({
-        type: "synergy",
-        label: "Team Synergy",
-        detail: `Only ${range} pts between all four members — great chemistry!`,
-        icon: "flame",
-      });
-    }
+    team.totalScore = contributions.reduce((sum, c) => sum + c.score, 0);
   }
 
   return analyzed;

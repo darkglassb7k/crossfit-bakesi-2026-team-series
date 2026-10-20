@@ -4,6 +4,8 @@
 export interface Member {
   name: string;
   score: number; // Workout 1 (Individual) placement points
+  individualScores?: Record<number, number>; // later individual workouts (W3, ...), keyed by workout id
+  workoutNames?: Record<number, string>; // who actually did a given workout, when it differs from `name`
 }
 
 // Team-format workout result (a single score for the whole team, e.g. Workout 2)
@@ -51,8 +53,8 @@ export interface TeamData {
   captainName: string;
   groupName: string;
   logo: string | null;
-  totalScore: number; // cumulative across all completed workouts (lowest wins)
-  members: Member[]; // Workout 1 individual scores
+  totalScore: number; // cumulative across all completed workouts (lowest wins), recomputed in analysis.ts
+  members: Member[]; // individual workout scores (W1, W3, ...)
   teamScores: TeamWorkoutScore[]; // team-format workout results (WO2, ...)
   incomplete?: boolean; // team missed a completed workout — total shown as N/A, ranked last
   highlights: string[];
@@ -98,7 +100,7 @@ export const workouts: Workout[] = [
       "If you cannot make it on May 23, find a coach to judge when you and your team members are available",
     ],
   },
-  { id: 3, name: "Workout 3", date: "Aug 17 - Aug 29", type: "In person/Remote", format: "Individual", status: "upcoming",
+  { id: 3, name: "Workout 3", date: "Aug 17 - Aug 29", type: "In person/Remote", format: "Individual", status: "completed",
     description: [
       {
         title: "",
@@ -162,7 +164,7 @@ export const workouts: Workout[] = [
   { id: 6, name: "Workout 7 / 8", date: "Dec 5", type: "In person", format: "Team Series", status: "upcoming" },
 ];
 
-// All 14 teams with Workout 1 individual scores from the whiteboard photo
+// 13 teams. W1 + W3 individual scores from the Team series.xlsx Individual Leader Board
 // Logo mapping from Google Doc HTML export
 export const teams: TeamData[] = [
   {
@@ -170,12 +172,12 @@ export const teams: TeamData[] = [
     captainName: "Howard",
     groupName: "Thigh Masters",
     logo: "/logos/image6.png",
-    totalScore: 305,
+    totalScore: 383,
     members: [
-      { name: "Howard", score: 27 },
-      { name: "Steph", score: 19 },
-      { name: "Stan", score: 105 },
-      { name: "Kirstyn", score: 150 },
+      { name: "Howard", score: 27, individualScores: { 3: 2 } },
+      { name: "Steph", score: 19, individualScores: { 3: 12 } },
+      { name: "Stan", score: 105, individualScores: { 3: 25 } },
+      { name: "Kirstyn", score: 150, individualScores: { 3: 39 } },
     ],
     teamScores: [{ workoutId: 2, score: 4 }],
     highlights: [],
@@ -186,12 +188,12 @@ export const teams: TeamData[] = [
     captainName: "Will",
     groupName: "DRAGONFRUIT",
     logo: "/logos/image4.png",
-    totalScore: 320,
+    totalScore: 381,
     members: [
-      { name: "Will", score: 46 },
-      { name: "Kat", score: 34 },
-      { name: "Keishi", score: 83 },
-      { name: "Amy", score: 141 },
+      { name: "Will", score: 46, individualScores: { 3: 4 } },
+      { name: "Kat", score: 34, individualScores: { 3: 13 } },
+      { name: "Keishi", score: 83, individualScores: { 3: 28 } },
+      { name: "Amy", score: 141, individualScores: { 3: 16 } },
     ],
     teamScores: [{ workoutId: 2, score: 16 }],
     highlights: [],
@@ -202,12 +204,12 @@ export const teams: TeamData[] = [
     captainName: "Derong",
     groupName: "YEEHAW",
     logo: "/logos/image12.png",
-    totalScore: 323,
+    totalScore: 380,
     members: [
-      { name: "Derong", score: 21 },
-      { name: "Amber", score: 108 },
-      { name: "Jerry", score: 62 },
-      { name: "Xena", score: 115 },
+      { name: "Derong", score: 21, individualScores: { 3: 1 } },
+      { name: "Amber", score: 109, individualScores: { 3: 33 } },
+      { name: "Jerry", score: 62, individualScores: { 3: 15 } },
+      { name: "Xena", score: 116, individualScores: { 3: 6 } },
     ],
     teamScores: [{ workoutId: 2, score: 17 }],
     highlights: [],
@@ -218,12 +220,12 @@ export const teams: TeamData[] = [
     captainName: "Kingson",
     groupName: "Barkesi",
     logo: "/logos/image1.png",
-    totalScore: 317,
+    totalScore: 427,
     members: [
-      { name: "Kingson", score: 6 },
-      { name: "Sherry", score: 81 },
-      { name: "Jason", score: 154 },
-      { name: "Flora", score: 69 },
+      { name: "Kingson", score: 6, individualScores: { 3: 8 } },
+      { name: "Sherry/Regina", score: 81, individualScores: { 3: 20 }, workoutNames: { 1: "Sherry", 3: "Regina" } },
+      { name: "Jason", score: 154, individualScores: { 3: 48 } },
+      { name: "Flora", score: 69, individualScores: { 3: 34 } },
     ],
     teamScores: [{ workoutId: 2, score: 7 }],
     highlights: [],
@@ -234,12 +236,12 @@ export const teams: TeamData[] = [
     captainName: "Marcus",
     groupName: "Rabbit Rapids",
     logo: "/logos/image5.png",
-    totalScore: 337,
+    totalScore: 445,
     members: [
-      { name: "Marcus", score: 11 },
-      { name: "Cindy", score: 88 },
-      { name: "Steve L", score: 91 },
-      { name: "Wendy", score: 133 },
+      { name: "Marcus", score: 11, individualScores: { 3: 10 } },
+      { name: "Cindy", score: 88, individualScores: { 3: 32 } },
+      { name: "Steve L", score: 91, individualScores: { 3: 19 } },
+      { name: "Wendy", score: 133, individualScores: { 3: 47 } },
     ],
     teamScores: [{ workoutId: 2, score: 14 }],
     highlights: [],
@@ -250,12 +252,12 @@ export const teams: TeamData[] = [
     captainName: "Seb",
     groupName: "Buffalo Swoldiers",
     logo: "/logos/image8.png",
-    totalScore: 331,
+    totalScore: 425,
     members: [
-      { name: "Seb", score: 3 },
-      { name: "Chantal", score: 119 },
-      { name: "Kevin", score: 93 },
-      { name: "Yvette", score: 113 },
+      { name: "Seb", score: 3, individualScores: { 3: 3 } },
+      { name: "Chantal", score: 119, individualScores: { 3: 46 } },
+      { name: "Kevin", score: 93, individualScores: { 3: 14 } },
+      { name: "Yvette", score: 113, individualScores: { 3: 31 } },
     ],
     teamScores: [{ workoutId: 2, score: 3 }],
     highlights: [],
@@ -266,12 +268,12 @@ export const teams: TeamData[] = [
     captainName: "Eddie C",
     groupName: "",
     logo: "/logos/image2.png",
-    totalScore: 349,
+    totalScore: 520,
     members: [
-      { name: "Eddie C", score: 31 },
-      { name: "Stev", score: 22 },
-      { name: "Roger", score: 144 },
-      { name: "Jess", score: 140 },
+      { name: "Eddie C", score: 31, individualScores: { 3: 5 } },
+      { name: "Stev", score: 55, individualScores: { 3: 41 } },
+      { name: "Roger", score: 144, individualScores: { 3: 49 } },
+      { name: "Jess", score: 140, individualScores: { 3: 43 } },
     ],
     teamScores: [{ workoutId: 2, score: 12 }],
     highlights: [],
@@ -282,12 +284,12 @@ export const teams: TeamData[] = [
     captainName: "Eddie L",
     groupName: "Oink",
     logo: "/logos/image11.png",
-    totalScore: 355,
+    totalScore: 472,
     members: [
-      { name: "Eddie L", score: 49 },
-      { name: "Emma", score: 54 },
-      { name: "Danny", score: 102 },
-      { name: "Helen", score: 138 },
+      { name: "Eddie L", score: 49, individualScores: { 3: 9 } },
+      { name: "Emma", score: 54, individualScores: { 3: 23 } },
+      { name: "Danny", score: 103, individualScores: { 3: 38 } },
+      { name: "Helen", score: 139, individualScores: { 3: 45 } },
     ],
     teamScores: [{ workoutId: 2, score: 12 }],
     highlights: [],
@@ -298,12 +300,12 @@ export const teams: TeamData[] = [
     captainName: "Tyler",
     groupName: "Eye of the Barbell",
     logo: "/logos/image9.png",
-    totalScore: 374,
+    totalScore: 515,
     members: [
-      { name: "Tyler", score: 22 },
-      { name: "Karen", score: 117 },
-      { name: "Bruce", score: 112 },
-      { name: "Roxanne", score: 105 },
+      { name: "Tyler", score: 22, individualScores: { 3: 27 } },
+      { name: "Karen", score: 117, individualScores: { 3: 40 } },
+      { name: "Bruce", score: 112, individualScores: { 3: 44 } },
+      { name: "Roxanne", score: 105, individualScores: { 3: 30 } },
     ],
     teamScores: [{ workoutId: 2, score: 18 }],
     highlights: [],
@@ -314,12 +316,12 @@ export const teams: TeamData[] = [
     captainName: "Tony",
     groupName: "",
     logo: null,
-    totalScore: 388,
+    totalScore: 527,
     members: [
-      { name: "Tony", score: 51 },
-      { name: "Cathy", score: 25 },
-      { name: "Ben", score: 154 },
-      { name: "Sharon", score: 138 },
+      { name: "Tony", score: 51, individualScores: { 3: 24 } },
+      { name: "Cathy", score: 25, individualScores: { 3: 17 } },
+      { name: "Ben", score: 154, individualScores: { 3: 49 } },
+      { name: "Sharon", score: 138, individualScores: { 3: 49 } },
     ],
     teamScores: [{ workoutId: 2, score: 20 }],
     highlights: [],
@@ -330,12 +332,12 @@ export const teams: TeamData[] = [
     captainName: "Pohan",
     groupName: "Jenni.佛",
     logo: "/logos/image3.png",
-    totalScore: 410,
+    totalScore: 493,
     members: [
-      { name: "Pohan", score: 144 },
-      { name: "June", score: 88 },
-      { name: "Al", score: 75 },
-      { name: "Chiaki", score: 80 },
+      { name: "Pohan", score: 130, individualScores: { 3: 18 } },
+      { name: "June", score: 89, individualScores: { 3: 37 } },
+      { name: "Al", score: 75, individualScores: { 3: 29 } },
+      { name: "Chiaki", score: 81, individualScores: { 3: 11 } },
     ],
     teamScores: [{ workoutId: 2, score: 23 }],
     highlights: [],
@@ -346,12 +348,12 @@ export const teams: TeamData[] = [
     captainName: "Rob",
     groupName: "SLYTHERIN",
     logo: "/logos/image10.png",
-    totalScore: 395,
+    totalScore: 520,
     members: [
-      { name: "Rob", score: 35 },
-      { name: "Nancy", score: 65 },
-      { name: "Isabel", score: 149 },
-      { name: "Louis", score: 125 },
+      { name: "Rob", score: 35, individualScores: { 3: 22 } },
+      { name: "Nancy", score: 65, individualScores: { 3: 35 } },
+      { name: "Isabel", score: 125, individualScores: { 3: 42 } },
+      { name: "Louis", score: 149, individualScores: { 3: 26 } },
     ],
     teamScores: [{ workoutId: 2, score: 21 }],
     highlights: [],
@@ -362,31 +364,14 @@ export const teams: TeamData[] = [
     captainName: "TJ",
     groupName: "BARBELL MONKEYS",
     logo: "/logos/image7.png",
-    totalScore: 402,
+    totalScore: 515,
     members: [
-      { name: "TJ", score: 154 },
-      { name: "Niki", score: 26 },
-      { name: "Steve Chu", score: 66 },
-      { name: "Lillian", score: 135 },
+      { name: "TJ", score: 154, individualScores: { 3: 49 } },
+      { name: "Niki", score: 26, individualScores: { 3: 7 } },
+      { name: "Steve Chu", score: 66, individualScores: { 3: 21 } },
+      { name: "Lillian", score: 135, individualScores: { 3: 36 } },
     ],
     teamScores: [{ workoutId: 2, score: 21 }],
-    highlights: [],
-    badges: [],
-  },
-  {
-    teamName: "Team Ed",
-    captainName: "Ed",
-    groupName: "",
-    logo: null,
-    totalScore: 410, // Workout 1 only — did not compete in Workout 2
-    incomplete: true,
-    members: [
-      { name: "Ed", score: 45 },
-      { name: "Pei Li", score: 93 },
-      { name: "Ping", score: 149 },
-      { name: "Tina", score: 123 },
-    ],
-    teamScores: [],
     highlights: [],
     badges: [],
   },
